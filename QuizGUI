@@ -1,0 +1,165 @@
+package quizsystem;
+
+import javax.swing.*;
+import java.awt.event.*;
+import java.io.*;
+
+
+class Question {
+    private String question;
+    private String option1;
+    private String option2;
+    private int correctAnswer;
+
+   
+    public Question(String q, String o1, String o2, int ans) {
+        this.question = q;
+        this.option1 = o1;
+        this.option2 = o2;
+        this.correctAnswer = ans;
+    }
+
+    
+    public String getQuestion() { return question; }
+    public String getOption1() { return option1; }
+    public String getOption2() { return option2; }
+
+    public int getCorrectAnswer() {
+        return correctAnswer;
+    }
+
+    
+    public int evaluate(int selected) {
+        if (selected == correctAnswer)
+            return 1;
+        else
+            return 0;
+    }
+}
+
+
+class VivaQuestion extends Question {
+
+    public VivaQuestion(String q, String o1, String o2, int ans) {
+        super(q, o1, o2, ans);
+    }
+
+ 
+    @Override
+    public int evaluate(int selected) {
+        
+        return super.evaluate(selected);
+    }
+}
+
+
+public class QuizGUI extends JFrame implements ActionListener {
+
+    JLabel qLabel;
+    JRadioButton opt1, opt2;
+    JButton next;
+
+    ButtonGroup group;
+
+    int index = 0;
+    int score = 0;
+
+    Question qlist[];
+
+    
+    public QuizGUI() {
+
+        setTitle("Online Quiz System");
+        setSize(400, 300);
+        setLayout(null);
+
+        qLabel = new JLabel();
+        qLabel.setBounds(50, 50, 300, 30);
+        add(qLabel);
+
+        opt1 = new JRadioButton();
+        opt1.setBounds(50, 100, 200, 30);
+        add(opt1);
+
+        opt2 = new JRadioButton();
+        opt2.setBounds(50, 140, 200, 30);
+        add(opt2);
+
+        group = new ButtonGroup();
+        group.add(opt1);
+        group.add(opt2);
+
+        next = new JButton("Next");
+        next.setBounds(150, 200, 80, 30);
+        next.addActionListener(this);
+        add(next);
+
+        
+        qlist = new Question[] {
+            new Question("Java is?", "Language", "Animal", 1),
+            new Question("JVM stands for?", "Java Virtual Machine", "Java Volume", 1),
+            new VivaQuestion("OOP means?", "Object Oriented Programming", "Only One Program", 1)
+        };
+
+        loadQuestion();
+
+        setVisible(true);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    
+    void loadQuestion() {
+        if (index < qlist.length) {
+            qLabel.setText(qlist[index].getQuestion());
+            opt1.setText(qlist[index].getOption1());
+            opt2.setText(qlist[index].getOption2());
+            group.clearSelection();
+        } else {
+            showResult();
+        }
+    }
+
+    
+    public void actionPerformed(ActionEvent e) {
+
+        try {
+            int selected = -1;
+
+            if (opt1.isSelected()) selected = 1;
+            if (opt2.isSelected()) selected = 2;
+
+            if (selected == -1) {
+                JOptionPane.showMessageDialog(this, "Please select an option!");
+                return;
+            }
+
+            score += qlist[index].evaluate(selected);
+            index++;
+
+            loadQuestion();
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error occurred!");
+        }
+    }
+
+    
+    void showResult() {
+        JOptionPane.showMessageDialog(this, "Your Score: " + score);
+
+        try {
+            FileWriter fw = new FileWriter("result.txt");
+            fw.write("Score: " + score);
+            fw.close();
+        } catch (IOException e) {
+            System.out.println("File Error");
+        }
+
+        System.exit(0);
+    }
+
+    
+    public static void main(String[] args) {
+        new QuizGUI();
+    }
+}
